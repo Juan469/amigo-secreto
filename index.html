@@ -1,325 +1,849 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Amigo Secreto</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Amigo Secreto - Presencial y WhatsApp</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Outfit"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+            }
+          }
         }
-        
-        .container {
-            background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            max-width: 500px;
-            width: 100%;
-            padding: 30px;
-        }
-        
-        h1 { text-align: center; color: #333; margin-bottom: 10px; font-size: 28px; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 25px; font-size: 14px; }
-        .section { margin-bottom: 25px; }
-        .section-title { color: #667eea; font-weight: 600; margin-bottom: 12px; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .input-group { display: flex; gap: 10px; margin-bottom: 15px; }
-        
-        input {
-            flex: 1; padding: 12px 15px; border: 2px solid #e0e0e0;
-            border-radius: 10px; font-size: 14px; transition: all 0.3s ease;
-        }
-        input:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
-        
-        button {
-            padding: 12px 18px; border: none; border-radius: 10px;
-            font-size: 13px; font-weight: 600; cursor: pointer;
-            transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        
-        .btn-add { background: #667eea; color: white; }
-        .btn-add:hover { background: #5568d3; }
-        .btn-generate { width: 100%; background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-size: 15px; padding: 14px; margin-top: 15px; }
-        .btn-generate:disabled { opacity: 0.5; cursor: not-allowed; }
-        .btn-reset { width: 100%; background: #f0f0f0; color: #333; margin-top: 10px; }
-        .btn-reset:hover { background: #e0e0e0; }
-        
-        .participants-list { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
-        .participant-tag {
-            background: linear-gradient(135deg, #667eea, #764ba2); color: white;
-            padding: 8px 12px; border-radius: 20px; font-size: 13px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .participant-tag button {
-            background: rgba(255, 255, 255, 0.3); color: white; border: none;
-            border-radius: 50%; width: 18px; height: 18px; padding: 0;
-            cursor: pointer; font-size: 11px; display: flex; align-items: center; justify-content: center;
-        }
-        
-        .error {
-            background: #ffebee; color: #c62828; padding: 12px 15px;
-            border-radius: 8px; margin-bottom: 15px; font-size: 13px; display: none;
-        }
-        .error.show { display: block; }
-        
-        .count-badge { background: #667eea; color: white; border-radius: 20px; padding: 2px 8px; font-size: 12px; margin-left: 8px; font-weight: 600; }
-        
-        .secret-mode { text-align: center; padding: 10px; }
-        .secret-result {
-            background: linear-gradient(135deg, #667eea, #764ba2); color: white;
-            padding: 30px; border-radius: 20px; margin-top: 15px;
-            display: flex; flex-direction: column; align-items: center;
-        }
-        .secret-result-name { font-size: 32px; font-weight: 700; margin: 15px 0; }
-        .secret-warning { background: #fff3cd; color: #856404; padding: 12px; border-radius: 10px; margin-top: 20px; font-size: 12px; border-left: 4px solid #ffc107; }
-        
-        .personal-links-list { background: #f9f9f9; border-radius: 12px; padding: 12px; margin-top: 15px; }
-        .personal-link-item { background: white; border: 1px solid #e0e0e0; border-radius: 10px; padding: 10px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-        .personal-link-name { font-weight: 600; color: #333; font-size: 14px; }
-        .btn-whatsapp { background: #25D366; color: white; padding: 8px 12px; border-radius: 8px; text-decoration: none; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
-        .btn-whatsapp:hover { background: #1ebd56; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🎁 Amigo Secreto</h1>
-        <p class="subtitle">¡Sorteo rápido para WhatsApp!</p>
-        
-        <div class="error" id="error"></div>
-        
-        <!-- PANTALLA CREAR JUEGO -->
-        <div id="setupMode">
-            <div class="section">
-                <div class="section-title">Agregar participantes</div>
-                <div class="input-group">
-                    <input type="text" id="nameInput" placeholder="Escribe un nombre..." />
-                    <button class="btn-add" onclick="addParticipant()">Añadir</button>
-                </div>
-            </div>
-            
-            <div class="section">
-                <div class="section-title">
-                    Participantes
-                    <span class="count-badge" id="countBadge">0</span>
-                </div>
-                <div class="participants-list" id="participantsList"></div>
-            </div>
-            
-            <button class="btn-generate" id="generateBtn" onclick="generateAssignments()" disabled>
-                Generar Enlaces para WhatsApp
-            </button>
-        </div>
-        
-        <!-- PANTALLA LISTA DE ENLACES PARA WHATSAPP -->
-        <div id="shareMode" style="display: none;">
-            <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; text-align: center;">
-                <h3 style="margin-bottom: 5px; color: white;">🎉 ¡Sorteo Realizado!</h3>
-                <p style="font-size: 12px;">Haz clic en el botón de WhatsApp al lado de cada nombre para enviarle su enlace privado.</p>
-            </div>
-            
-            <div class="personal-links-list" id="personalLinksList"></div>
-            
-            <button class="btn-reset" onclick="resetApp()">← Crear Otro Sorteo</button>
-        </div>
-        
-        <!-- PANTALLA REVELAR RECEPTOR (CUANDO ABREN EL ENLACE) -->
-        <div id="playerMode" style="display: none;">
-            <div class="secret-mode">
-                <h2>🎁 Amigo Secreto</h2>
-                
-                <div id="pinVerification">
-                    <p style="color: #666; margin: 15px 0; font-size: 14px;">Para mantener la privacidad, confirma tus datos:</p>
-                    <div class="input-group">
-                        <input type="text" id="userPinInput" placeholder="Ingresa tu PIN de 4 dígitos" maxlength="4" inputmode="numeric" style="text-align: center; font-weight: bold; font-size: 18px;" />
-                    </div>
-                    <button class="btn-generate" onclick="verifyPin()">Revelar Mi Amigo Secreto</button>
-                </div>
+      }
+    }
+  </script>
 
-                <div id="playerSecretResult" style="display: none;"></div>
-                
-                <div class="secret-warning">
-                    ⚠️ Mantén el secreto. ¡No le digas a nadie quién te tocó! 🤐
-                </div>
+  <style>
+    body {
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      min-height: 100vh;
+      color: #f8fafc;
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .glass-card-interactive {
+      background: rgba(30, 41, 59, 0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .glass-card-interactive:hover {
+      border-color: rgba(168, 85, 247, 0.4);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 24px -10px rgba(168, 85, 247, 0.25);
+    }
+
+    .custom-glow {
+      box-shadow: 0 0 40px -10px rgba(236, 72, 153, 0.3);
+    }
+
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+    }
+
+    .card-inner.is-flipped {
+      transform: rotateY(180deg);
+    }
+
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 1.5rem;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.6);
+      border-radius: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: rgba(168, 85, 247, 0.4);
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body class="font-sans antialiased flex flex-col min-h-screen text-slate-100 p-3 sm:p-6 md:p-8 justify-between">
+
+  <!-- VISTA PARA RECEPTOR REMOTO (AL ABRIR LINK DE WHATSAPP) -->
+  <div id="remote-receiver-view" class="hidden max-w-lg mx-auto w-full my-auto py-6">
+    <div class="glass-card rounded-3xl p-6 sm:p-8 text-center custom-glow border border-purple-500/30">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-pink-950/80 text-pink-300 text-xs font-semibold mb-4 border border-pink-500/30">
+        <i class="fa-solid fa-gift text-pink-400"></i> Amigo Secreto Especial
+      </div>
+      
+      <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-white mb-1">
+        ¡Hola, <span id="remote-user-name" class="text-pink-400"></span>!
+      </h2>
+      <p class="text-slate-300 text-sm mb-6">
+        Te han enviado un pase personal para descubrir a quién le vas a regalar.
+      </p>
+
+      <!-- Tarjeta Flip para Revelación Remota -->
+      <div class="w-full h-80 perspective-1000 mb-6">
+        <div id="remote-flip-card-inner" class="card-inner">
+          
+          <!-- Frente -->
+          <div class="card-front glass-card border border-purple-500/40 flex flex-col items-center justify-center p-6 text-center cursor-pointer hover:border-pink-500/60 transition-all" onclick="revealRemoteSecret()">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500/20 to-purple-600/20 flex items-center justify-center text-pink-400 text-3xl mb-4 border border-pink-500/30">
+              <i class="fa-solid fa-envelope-open-text animate-bounce"></i>
             </div>
+            <h4 class="font-display text-xl font-bold text-white mb-2">Toca para descubrir</h4>
+            <p class="text-slate-400 text-xs">Asegúrate de estar a solas y presiona aquí para dar la vuelta al sobre.</p>
+          </div>
+
+          <!-- Reverso -->
+          <div class="card-back glass-card border-2 border-emerald-500/50 bg-gradient-to-b from-slate-900 via-emerald-950/30 to-slate-900 flex flex-col items-center justify-center p-6 text-center">
+            <span class="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-full border border-emerald-500/30 mb-3">
+              <i class="fa-solid fa-circle-check mr-1"></i> ¡Tu Amigo Secreto Es!
+            </span>
+            <div class="my-3 py-4 px-6 bg-slate-900/90 rounded-2xl border border-emerald-500/40 w-full shadow-inner">
+              <h2 id="remote-target-name" class="font-display text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-400">
+                ???
+              </h2>
+            </div>
+            <p class="text-slate-400 text-xs mt-2">¡Recuerda mantener el secreto y preparar tu regalo!</p>
+          </div>
+
         </div>
+      </div>
+
+      <p class="text-xs text-slate-500">
+        <i class="fa-solid fa-shield-halved text-purple-400 mr-1"></i> Este enlace es personal e intransferible.
+      </p>
     </div>
-    
-    <script>
-        let participants = [];
-        let generatedData = {};
-        let currentTargetData = null;
-        
-        function generatePin() {
-            return Math.floor(1000 + Math.random() * 9000).toString();
-        }
-        
-        function addParticipant() {
-            const input = document.getElementById('nameInput');
-            const name = input.value.trim();
-            if (!name) return showError('Por favor ingresa un nombre');
-            if (participants.some(p => p.toLowerCase() === name.toLowerCase())) {
-                return showError('Este nombre ya está en la lista');
-            }
-            
-            participants.push(name);
-            input.value = '';
-            updateUI();
-            input.focus();
-        }
-        
-        function removeParticipant(name) {
-            participants = participants.filter(p => p !== name);
-            updateUI();
-        }
-        
-        function updateUI() {
-            const list = document.getElementById('participantsList');
-            const badge = document.getElementById('countBadge');
-            const generateBtn = document.getElementById('generateBtn');
-            
-            list.innerHTML = participants.map(name => `
-                <div class="participant-tag">
-                    <span>${name}</span>
-                    <button onclick="removeParticipant('${name}')">×</button>
+  </div>
+
+  <!-- VISTA ORGANIZADOR PRINCIPAL -->
+  <div id="main-organizer-app" class="max-w-4xl mx-auto w-full">
+    <!-- Encabezado -->
+    <header class="text-center mb-6">
+      <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card text-xs font-semibold text-pink-400 mb-3 border border-pink-500/20">
+        <i class="fa-solid fa-paper-plane text-pink-400"></i> Presencial o por WhatsApp
+      </div>
+      <h1 class="font-display text-4xl sm:text-5xl font-extrabold tracking-tight bg-gradient-to-r from-pink-400 via-purple-300 to-indigo-400 bg-clip-text text-transparent">
+        Amigo Secreto
+      </h1>
+      <p class="text-slate-400 mt-2 text-sm sm:text-base max-w-md mx-auto">
+        Organiza el sorteo y envía los resultados por WhatsApp o consúltalos en un mismo teléfono.
+      </p>
+    </header>
+
+    <!-- Indicador de Pasos -->
+    <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-6 max-w-2xl mx-auto">
+      <div id="step-1-indicator" class="flex flex-col items-center p-3 rounded-2xl glass-card border-2 border-purple-500 transition-all">
+        <span class="w-8 h-8 rounded-full bg-purple-600 text-white font-bold flex items-center justify-center text-sm mb-1">1</span>
+        <span class="text-xs font-semibold text-slate-200 text-center">Participantes</span>
+      </div>
+      <div id="step-2-indicator" class="flex flex-col items-center p-3 rounded-2xl glass-card opacity-50 transition-all">
+        <span class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-sm mb-1">2</span>
+        <span class="text-xs font-semibold text-slate-400 text-center">Sorteo</span>
+      </div>
+      <div id="step-3-indicator" class="flex flex-col items-center p-3 rounded-2xl glass-card opacity-50 transition-all">
+        <span class="w-8 h-8 rounded-full bg-slate-700 text-slate-300 font-bold flex items-center justify-center text-sm mb-1">3</span>
+        <span class="text-xs font-semibold text-slate-400 text-center">Entregar</span>
+      </div>
+    </div>
+
+    <!-- PASO 1: REGISTRO DE PARTICIPANTES -->
+    <section id="section-step1" class="glass-card rounded-3xl p-5 sm:p-8 custom-glow mb-8 transition-all">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+        <div>
+          <h2 class="font-display text-2xl font-bold text-white flex items-center gap-2">
+            <i class="fa-solid fa-users text-purple-400"></i> Registrar Participantes
+          </h2>
+          <p class="text-slate-400 text-sm mt-1">Ingresa el nombre de cada persona del grupo (Mínimo 3).</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span id="participant-count-badge" class="px-3 py-1 rounded-xl bg-purple-950/80 text-purple-300 font-semibold text-xs border border-purple-800/50">
+            0 Registrados
+          </span>
+          <button id="btn-clear-all" onclick="clearAllParticipants()" class="hidden px-3 py-1 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 rounded-xl transition-all">
+            <i class="fa-solid fa-trash-can mr-1"></i> Borrar
+          </button>
+        </div>
+      </div>
+
+      <form id="add-participant-form" onsubmit="handleAddParticipant(event)" class="flex flex-col sm:flex-row gap-3 mb-6">
+        <div class="relative flex-grow">
+          <i class="fa-solid fa-user text-slate-500 absolute left-4 top-1/2 -translate-y-1/2"></i>
+          <input 
+            type="text" 
+            id="participant-name-input" 
+            placeholder="Nombre del participante..." 
+            class="w-full bg-slate-900/80 text-white placeholder-slate-500 border border-slate-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 rounded-2xl py-3 pl-11 pr-4 outline-none transition-all"
+            maxlength="25"
+            required
+          />
+        </div>
+        <button 
+          type="submit" 
+          class="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold py-3 px-6 rounded-2xl flex items-center justify-center gap-2 shadow-lg shadow-purple-600/20 transition-all active:scale-95"
+        >
+          <i class="fa-solid fa-plus"></i> Añadir
+        </button>
+      </form>
+
+      <div id="participants-list-container" class="space-y-2 max-h-60 overflow-y-auto pr-1 custom-scrollbar">
+        <div id="empty-state" class="text-center py-8 text-slate-500 border-2 border-dashed border-slate-800 rounded-2xl">
+          <i class="fa-solid fa-user-plus text-3xl mb-2 block opacity-50"></i>
+          Aún no hay participantes en la lista.
+        </div>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-slate-700/50 flex justify-end">
+        <button 
+          id="btn-start-draw" 
+          onclick="startDrawProcess()" 
+          disabled
+          class="bg-slate-800 text-slate-500 cursor-not-allowed font-bold py-3.5 px-8 rounded-2xl flex items-center gap-3 transition-all shadow-xl"
+        >
+          <span>Realizar Sorteo</span>
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- PASO 2: ANIMACIÓN DE MEZCLA -->
+    <section id="section-step2" class="hidden glass-card rounded-3xl p-8 sm:p-12 text-center custom-glow mb-8">
+      <div class="max-w-md mx-auto">
+        <div class="w-24 h-24 mx-auto mb-6 relative flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 animate-spin blur-md opacity-70"></div>
+          <div class="relative w-20 h-20 bg-slate-900 rounded-full flex items-center justify-center border border-purple-400">
+            <i class="fa-solid fa-dice-d20 text-3xl text-pink-400 animate-bounce"></i>
+          </div>
+        </div>
+        <h2 class="font-display text-2xl font-bold text-white mb-2">Generando enlaces secretos...</h2>
+        <p class="text-slate-400 text-sm mb-6">Emparejando de forma segura para enviar por WhatsApp o consultar en vivo.</p>
+        <div class="w-full bg-slate-800 rounded-full h-2 mb-4 overflow-hidden">
+          <div id="draw-progress-bar" class="bg-gradient-to-r from-pink-500 to-purple-500 h-full w-0 transition-all duration-1000"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PASO 3: PANEL DE ENTREGA Y WHATSAPP -->
+    <section id="section-step3" class="hidden space-y-6 mb-8">
+      
+      <div id="reveal-select-user-card" class="glass-card rounded-3xl p-5 sm:p-8 custom-glow">
+        <div class="text-center max-w-lg mx-auto mb-6">
+          <span class="px-3 py-1 rounded-full bg-emerald-950/80 text-emerald-400 border border-emerald-800/50 text-xs font-semibold uppercase tracking-wider mb-2 inline-block">
+            <i class="fa-solid fa-circle-check mr-1"></i> Sorteo Listo
+          </span>
+          <h2 class="font-display text-2xl sm:text-3xl font-bold text-white">¿Cómo deseas repartir?</h2>
+          <p class="text-slate-400 text-sm mt-1">Puedes enviar el enlace privado a cada uno por WhatsApp o permitirles ver en este mismo teléfono.</p>
+        </div>
+
+        <!-- Selector de Modo -->
+        <div class="flex bg-slate-900/80 p-1.5 rounded-2xl border border-slate-800 mb-6 max-w-md mx-auto">
+          <button id="tab-btn-whatsapp" onclick="switchDeliveryMode('whatsapp')" class="flex-1 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all bg-emerald-600 text-white shadow-lg flex items-center justify-center gap-2">
+            <i class="fa-brands fa-whatsapp text-lg"></i> Por WhatsApp
+          </button>
+          <button id="tab-btn-presencial" onclick="switchDeliveryMode('presencial')" class="flex-1 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all text-slate-400 hover:text-white flex items-center justify-center gap-2">
+            <i class="fa-solid fa-mobile-screen-button"></i> En este Celular
+          </button>
+        </div>
+
+        <!-- Lista de Participantes para Repartir -->
+        <div id="delivery-list" class="space-y-3 max-h-[420px] overflow-y-auto p-1 custom-scrollbar">
+          <!-- Dinámico -->
+        </div>
+
+        <!-- Botón para Reiniciar -->
+        <div class="mt-8 pt-6 border-t border-slate-700/50 flex items-center justify-between">
+          <span class="text-xs text-slate-400 flex items-center gap-1">
+            <i class="fa-solid fa-lock text-emerald-400"></i> Funciona 100% en GitHub Pages
+          </span>
+          <button onclick="confirmResetAll()" class="text-xs font-semibold text-slate-400 hover:text-rose-400 transition-colors flex items-center gap-1 px-3 py-2 rounded-xl hover:bg-slate-800/60">
+            <i class="fa-solid fa-rotate-left"></i> Nuevo Sorteo
+          </button>
+        </div>
+      </div>
+
+      <!-- Modal Confirmación Presencial -->
+      <div id="reveal-privacy-modal" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="glass-card rounded-3xl p-6 sm:p-8 max-w-md w-full text-center border border-purple-500/30 shadow-2xl relative">
+          <div class="w-16 h-16 bg-purple-900/50 border border-purple-500/40 rounded-full flex items-center justify-center mx-auto mb-4 text-purple-300 text-2xl">
+            <i class="fa-solid fa-user-secret"></i>
+          </div>
+          <p class="text-xs font-bold text-purple-400 uppercase tracking-widest mb-1">Verificación de Identidad</p>
+          <h3 class="font-display text-2xl font-bold text-white mb-2">
+            ¿Eres <span id="confirm-user-name" class="text-pink-400 underline decoration-pink-500/40"></span>?
+          </h3>
+          <p class="text-slate-300 text-sm mb-6 bg-slate-900/60 p-4 rounded-2xl border border-slate-800">
+            <i class="fa-solid fa-eye-slash text-amber-400 mr-1"></i> Asegúrate de que nadie esté mirando tu pantalla.
+          </p>
+          <div class="flex flex-col gap-3">
+            <button onclick="proceedToSecretReveal()" class="w-full bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3.5 px-6 rounded-2xl shadow-lg transition-all active:scale-95">
+              Sí, revelar mi Amigo Secreto
+            </button>
+            <button onclick="cancelPrivacyModal()" class="w-full bg-slate-800/80 hover:bg-slate-800 text-slate-300 font-semibold py-3 px-6 rounded-2xl transition-all">
+              Cancelar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal Revelación Presencial -->
+      <div id="reveal-card-view" class="hidden fixed inset-0 bg-slate-950/95 backdrop-blur-lg z-50 flex items-center justify-center p-4">
+        <div class="max-w-md w-full flex flex-col items-center">
+          <div class="text-center mb-6">
+            <span class="text-xs text-slate-400 uppercase tracking-widest block mb-1">Amigo Secreto de:</span>
+            <h3 id="revealer-person-name" class="font-display text-2xl font-bold text-pink-400"></h3>
+          </div>
+
+          <div class="w-full h-80 perspective-1000 mb-8">
+            <div id="flip-card-inner" class="card-inner">
+              <div class="card-front glass-card border border-purple-500/30 flex flex-col items-center justify-center p-6 text-center cursor-pointer shadow-2xl" onclick="revealTargetName()">
+                <div class="w-20 h-20 rounded-full bg-gradient-to-br from-pink-500/20 to-purple-600/20 flex items-center justify-center text-pink-400 text-3xl mb-4 border border-pink-500/30">
+                  <i class="fa-solid fa-gift"></i>
                 </div>
-            `).join('');
-            
-            badge.textContent = participants.length;
-            generateBtn.disabled = participants.length < 2;
+                <h4 class="font-display text-xl font-bold text-white mb-2">Toca para revelar</h4>
+                <p class="text-slate-400 text-xs">Presiona para voltear la tarjeta en privado.</p>
+              </div>
+
+              <div class="card-back glass-card border-2 border-emerald-500/50 bg-gradient-to-b from-slate-900 via-emerald-950/20 to-slate-900 flex flex-col items-center justify-center p-6 text-center shadow-2xl">
+                <div class="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-full border border-emerald-500/30 mb-3">
+                  <i class="fa-solid fa-check-circle mr-1"></i> ¡Tu Amigo Secreto Es!
+                </div>
+                <div class="my-3 py-4 px-6 bg-slate-900/90 rounded-2xl border border-emerald-500/40 w-full shadow-inner">
+                  <h2 id="assigned-secret-friend-name" class="font-display text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 via-teal-200 to-cyan-400">
+                    ???
+                  </h2>
+                </div>
+                <p class="text-slate-400 text-xs mt-2">Guarda el secreto y no le cuentes a nadie.</p>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="finishSecretView()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg border border-slate-700 transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-eye-slash"></i>
+            <span>Ocultar y Finalizar</span>
+          </button>
+        </div>
+      </div>
+
+    </section>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 z-50 bg-slate-800 border border-purple-500/50 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+    <i id="toast-icon" class="fa-solid fa-circle-info text-purple-400"></i>
+    <span id="toast-message" class="text-sm font-medium">Mensaje</span>
+  </div>
+
+  <footer class="text-center text-xs text-slate-500 py-4 max-w-4xl mx-auto w-full border-t border-slate-800/60 mt-auto">
+    <p>Amigo Secreto &bull; Compatible con WhatsApp y GitHub Pages</p>
+  </footer>
+
+  <script>
+    /* ESTADO GLOBAL Y LÓGICA DE APLICACIÓN */
+    let participants = [];
+    let matches = {};
+    let consulted = {};
+    let activeDeliveryMode = 'whatsapp'; // 'whatsapp' o 'presencial'
+    let currentSelectedUser = null;
+
+    const STORAGE_KEY_PARTICIPANTS = 'amigo_secreto_participants_v2';
+    const STORAGE_KEY_MATCHES = 'amigo_secreto_matches_v2';
+    const STORAGE_KEY_CONSULTED = 'amigo_secreto_consulted_v2';
+
+    window.onload = function() {
+      // Verificar si la URL tiene un hash de consulta personal (Modo WhatsApp Receptor)
+      if (window.location.hash && window.location.hash.includes('draw=')) {
+        handleRemoteLinkAccess();
+      } else {
+        loadStateFromStorage();
+        renderUI();
+      }
+    };
+
+    /* FUNCIONALIDAD PARA RECEPTOR REMOTO (WHATSAPP) */
+    function handleRemoteLinkAccess() {
+      try {
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const encodedData = params.get('draw');
+
+        if (!encodedData) return;
+
+        // Decodificar Base64 seguro UTF-8
+        const decodedJson = decodeURIComponent(escape(atob(encodedData)));
+        const payload = JSON.parse(decodedJson);
+
+        if (payload && payload.from && payload.to) {
+          // Ocultar app de organizador y mostrar vista receptor
+          document.getElementById('main-organizer-app').classList.add('hidden');
+          document.getElementById('remote-receiver-view').classList.remove('hidden');
+
+          document.getElementById('remote-user-name').innerText = payload.from;
+          document.getElementById('remote-target-name').innerText = payload.to;
         }
-        
-        function generateAssignments() {
-            if (participants.length < 2) return showError('Se necesitan al menos 2 participantes');
-            hideError();
-            
-            let receivers;
-            let attempts = 0;
-            do {
-                receivers = shuffle([...participants]);
-                attempts++;
-            } while (hasConflict(participants, receivers) && attempts < 100);
-            
-            if (hasConflict(participants, receivers)) {
-                return showError('Error al generar combinaciones. Intenta de nuevo.');
-            }
-            
-            const baseUrl = window.location.href.split('?')[0];
-            const listContainer = document.getElementById('personalLinksList');
-            let html = '';
-            
-            participants.forEach((giver, i) => {
-                const receiver = receivers[i];
-                const pin = generatePin();
-                
-                // Encriptar datos básicos en Base64 para pasarlos en la URL
-                const payload = btoa(unescape(encodeURIComponent(JSON.stringify({
-                    giver: giver,
-                    receiver: receiver,
-                    pin: pin
-                }))));
-                
-                const link = `${baseUrl}?data=${payload}`;
-                const message = encodeURIComponent(`¡Hola ${giver}! 🎁 Entra a este enlace para descubrir a quién le regalas en el Amigo Secreto: ${link}\n\nTu PIN de confirmación es: ${pin}`);
-                
-                html += `
-                    <div class="personal-link-item">
-                        <div>
-                            <div class="personal-link-name">👤 ${giver}</div>
-                            <div style="font-size: 11px; color: #666;">PIN: <strong>${pin}</strong></div>
-                        </div>
-                        <a href="https://wa.me/?text=${message}" target="_blank" class="btn-whatsapp">
-                            💬 Enviar
-                        </a>
-                    </div>
-                `;
-            });
-            
-            listContainer.innerHTML = html;
-            document.getElementById('setupMode').style.display = 'none';
-            document.getElementById('shareMode').style.display = 'block';
+      } catch (err) {
+        console.error("Error al decodificar enlace de WhatsApp", err);
+        showToast('Enlace no válido o dañado', 'warning');
+      }
+    }
+
+    function revealRemoteSecret() {
+      const card = document.getElementById('remote-flip-card-inner');
+      if (!card.classList.contains('is-flipped')) {
+        card.classList.add('is-flipped');
+        confetti({
+          particleCount: 70,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    /* LÓGICA DE ORGANIZADOR Y SORTEO */
+    function saveStateToStorage() {
+      localStorage.setItem(STORAGE_KEY_PARTICIPANTS, JSON.stringify(participants));
+      localStorage.setItem(STORAGE_KEY_MATCHES, JSON.stringify(matches));
+      localStorage.setItem(STORAGE_KEY_CONSULTED, JSON.stringify(consulted));
+    }
+
+    function loadStateFromStorage() {
+      try {
+        const p = localStorage.getItem(STORAGE_KEY_PARTICIPANTS);
+        const m = localStorage.getItem(STORAGE_KEY_MATCHES);
+        const c = localStorage.getItem(STORAGE_KEY_CONSULTED);
+
+        if (p) participants = JSON.parse(p);
+        if (m) matches = JSON.parse(m);
+        if (c) consulted = JSON.parse(c);
+      } catch (e) {
+        console.error("Error al cargar localStorage", e);
+      }
+    }
+
+    function handleAddParticipant(e) {
+      e.preventDefault();
+      const input = document.getElementById('participant-name-input');
+      const name = input.value.trim();
+
+      if (!name) return;
+
+      if (participants.some(p => p.toLowerCase() === name.toLowerCase())) {
+        showToast('Ese nombre ya está en la lista', 'warning');
+        return;
+      }
+
+      participants.push(name);
+      input.value = '';
+      saveStateToStorage();
+      renderUI();
+      showToast(`¡${name} agregado!`, 'success');
+    }
+
+    function removeParticipant(index) {
+      const removed = participants.splice(index, 1);
+      saveStateToStorage();
+      renderUI();
+      showToast(`${removed[0]} eliminado`, 'info');
+    }
+
+    function clearAllParticipants() {
+      if (confirm('¿Deseas borrar toda la lista de participantes?')) {
+        participants = [];
+        matches = {};
+        consulted = {};
+        saveStateToStorage();
+        renderUI();
+      }
+    }
+
+    function generateDerangement(arr) {
+      const n = arr.length;
+      if (n < 3) return null;
+
+      let result = [...arr];
+      let isValid = false;
+
+      while (!isValid) {
+        for (let i = n - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [result[i], result[j]] = [result[j], result[i]];
         }
-        
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
+        isValid = true;
+        for (let i = 0; i < n; i++) {
+          if (arr[i] === result[i]) {
+            isValid = false;
+            break;
+          }
         }
-        
-        function hasConflict(givers, receivers) {
-            for (let i = 0; i < givers.length; i++) {
-                if (givers[i] === receivers[i]) return true;
-            }
-            return false;
+      }
+
+      const matchMap = {};
+      for (let i = 0; i < n; i++) {
+        matchMap[arr[i]] = result[i];
+      }
+      return matchMap;
+    }
+
+    function startDrawProcess() {
+      if (participants.length < 3) {
+        showToast('Se necesitan mínimo 3 participantes', 'warning');
+        return;
+      }
+
+      document.getElementById('section-step1').classList.add('hidden');
+      document.getElementById('section-step2').classList.remove('hidden');
+      
+      const progressBar = document.getElementById('draw-progress-bar');
+      progressBar.style.width = '0%';
+
+      setTimeout(() => { progressBar.style.width = '50%'; }, 200);
+      setTimeout(() => { progressBar.style.width = '90%'; }, 600);
+
+      setTimeout(() => {
+        progressBar.style.width = '100%';
+        matches = generateDerangement(participants);
+        consulted = {};
+        participants.forEach(p => { consulted[p] = false; });
+        saveStateToStorage();
+
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+
+        document.getElementById('section-step2').classList.add('hidden');
+        renderUI();
+        showToast('¡Sorteo completado!', 'success');
+      }, 1000);
+    }
+
+    /* MODOS DE ENTREGA: WHATSAPP Y PRESENCIAL */
+    function switchDeliveryMode(mode) {
+      activeDeliveryMode = mode;
+      const btnWa = document.getElementById('tab-btn-whatsapp');
+      const btnPre = document.getElementById('tab-btn-presencial');
+
+      if (mode === 'whatsapp') {
+        btnWa.className = "flex-1 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all bg-emerald-600 text-white shadow-lg flex items-center justify-center gap-2";
+        btnPre.className = "flex-1 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all text-slate-400 hover:text-white flex items-center justify-center gap-2";
+      } else {
+        btnPre.className = "flex-1 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all bg-purple-600 text-white shadow-lg flex items-center justify-center gap-2";
+        btnWa.className = "flex-1 py-2.5 rounded-xl font-semibold text-xs sm:text-sm transition-all text-slate-400 hover:text-white flex items-center justify-center gap-2";
+      }
+      renderDeliveryList();
+    }
+
+    function generateWhatsAppLink(fromPerson, toPerson) {
+      const payload = { from: fromPerson, to: toPerson };
+      // Encriptación/Codificación simple segura UTF-8 Base64 para la URL
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      
+      // Obtener URL base de GitHub Pages o servidor local
+      const baseUrl = window.location.origin + window.location.pathname;
+      const fullSecretUrl = `${baseUrl}#draw=${encoded}`;
+
+      const message = `¡Hola *${fromPerson}*! 🎁
+Aquí está tu enlace personal y privado para descubrir quién es tu *Amigo Secreto*:
+
+${fullSecretUrl}
+
+⚠️ *Por favor no compartas este enlace con nadie.*`;
+
+      return `https://wa.me/?text=${encodeURIComponent(message)}`;
+    }
+
+    function copyParticipantLink(fromPerson, toPerson) {
+      const payload = { from: fromPerson, to: toPerson };
+      const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(payload))));
+      const baseUrl = window.location.origin + window.location.pathname;
+      const fullSecretUrl = `${baseUrl}#draw=${encoded}`;
+
+      const dummy = document.createElement('input');
+      document.body.appendChild(dummy);
+      dummy.value = fullSecretUrl;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+
+      consulted[fromPerson] = true;
+      saveStateToStorage();
+      renderDeliveryList();
+      showToast('Enlace copiado al portapapeles', 'success');
+    }
+
+    function handleWhatsAppClick(fromPerson) {
+      consulted[fromPerson] = true;
+      saveStateToStorage();
+      renderDeliveryList();
+    }
+
+    function renderDeliveryList() {
+      const container = document.getElementById('delivery-list');
+
+      container.innerHTML = participants.map((person) => {
+        const secretTarget = matches[person];
+        const isSentOrConsulted = consulted[person] === true;
+
+        if (activeDeliveryMode === 'whatsapp') {
+          const waUrl = generateWhatsAppLink(person, secretTarget);
+
+          return `
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-slate-900/60 border ${isSentOrConsulted ? 'border-emerald-900/40 opacity-80' : 'border-slate-800 hover:border-slate-700'} rounded-2xl gap-3 transition-all">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl ${isSentOrConsulted ? 'bg-emerald-950 text-emerald-400' : 'bg-purple-900/40 text-purple-300'} flex items-center justify-center font-bold">
+                  <i class="fa-solid ${isSentOrConsulted ? 'fa-check' : 'fa-user'}"></i>
+                </div>
+                <div>
+                  <h4 class="font-bold text-white text-sm">${escapeHtml(person)}</h4>
+                  <span class="text-xs ${isSentOrConsulted ? 'text-emerald-400' : 'text-slate-400'}">
+                    ${isSentOrConsulted ? 'Enlace generado / Enviado' : 'Pendiente por enviar'}
+                  </span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button 
+                  onclick="copyParticipantLink('${escapeJsString(person)}', '${escapeJsString(secretTarget)}')" 
+                  class="flex-1 sm:flex-initial px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1.5"
+                  title="Copiar Link Individual"
+                >
+                  <i class="fa-solid fa-copy"></i> Copiar Link
+                </button>
+                <a 
+                  href="${waUrl}" 
+                  target="_blank"
+                  onclick="handleWhatsAppClick('${escapeJsString(person)}')"
+                  class="flex-1 sm:flex-initial px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/20"
+                >
+                  <i class="fa-brands fa-whatsapp text-sm"></i> Enviar
+                </a>
+              </div>
+            </div>
+          `;
+        } else {
+          // Modo Presencial
+          if (isSentOrConsulted) {
+            return `
+              <div class="p-4 rounded-2xl bg-slate-900/40 border border-emerald-900/40 flex items-center justify-between opacity-75">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-emerald-950 text-emerald-400 flex items-center justify-center">
+                    <i class="fa-solid fa-check"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-slate-300 text-sm">${escapeHtml(person)}</h4>
+                    <span class="text-xs text-emerald-400 font-medium">Ya consultó</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            return `
+              <div 
+                onclick="openPrivacyModal('${escapeJsString(person)}')"
+                class="glass-card-interactive p-4 rounded-2xl cursor-pointer flex items-center justify-between group"
+              >
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl bg-purple-900/40 text-purple-300 flex items-center justify-center font-bold">
+                    <i class="fa-solid fa-user"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-white text-sm group-hover:text-pink-300 transition-colors">${escapeHtml(person)}</h4>
+                    <span class="text-xs text-slate-400">Ver en este dispositivo</span>
+                  </div>
+                </div>
+                <div class="w-8 h-8 rounded-xl bg-purple-950/60 text-purple-400 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-all">
+                  <i class="fa-solid fa-chevron-right text-xs"></i>
+                </div>
+              </div>
+            `;
+          }
         }
-        
-        function checkUrlParams() {
-            const params = new URLSearchParams(window.location.search);
-            const dataParam = params.get('data');
-            
-            if (dataParam) {
-                try {
-                    const decoded = JSON.parse(decodeURIComponent(escape(atob(dataParam))));
-                    currentTargetData = decoded;
-                    
-                    document.getElementById('setupMode').style.display = 'none';
-                    document.getElementById('shareMode').style.display = 'none';
-                    document.getElementById('playerMode').style.display = 'block';
-                } catch (e) {
-                    showError('El enlace no es válido');
-                }
-            }
+      }).join('');
+    }
+
+    /* REVELACIÓN PRESENCIAL */
+    function openPrivacyModal(personName) {
+      currentSelectedUser = personName;
+      document.getElementById('confirm-user-name').innerText = personName;
+      document.getElementById('reveal-privacy-modal').classList.remove('hidden');
+    }
+
+    function cancelPrivacyModal() {
+      currentSelectedUser = null;
+      document.getElementById('reveal-privacy-modal').classList.add('hidden');
+    }
+
+    function proceedToSecretReveal() {
+      document.getElementById('reveal-privacy-modal').classList.add('hidden');
+      const secretFriend = matches[currentSelectedUser];
+      document.getElementById('revealer-person-name').innerText = currentSelectedUser;
+      document.getElementById('assigned-secret-friend-name').innerText = secretFriend;
+      document.getElementById('flip-card-inner').classList.remove('is-flipped');
+      document.getElementById('reveal-card-view').classList.remove('hidden');
+    }
+
+    function revealTargetName() {
+      const cardInner = document.getElementById('flip-card-inner');
+      if (!cardInner.classList.contains('is-flipped')) {
+        cardInner.classList.add('is-flipped');
+        confetti({ particleCount: 50, spread: 60, origin: { y: 0.7 } });
+
+        if (currentSelectedUser) {
+          consulted[currentSelectedUser] = true;
+          saveStateToStorage();
         }
-        
-        function verifyPin() {
-            const inputPin = document.getElementById('userPinInput').value.trim();
-            if (!inputPin) return showError('Ingresa tu PIN');
-            
-            if (currentTargetData && inputPin === currentTargetData.pin) {
-                hideError();
-                document.getElementById('pinVerification').style.display = 'none';
-                
-                const resultDiv = document.getElementById('playerSecretResult');
-                resultDiv.style.display = 'block';
-                resultDiv.innerHTML = `
-                    <div class="secret-result">
-                        <div style="font-size: 40px;">🎁</div>
-                        <div style="font-size: 14px; opacity: 0.9;">Hola <strong>${currentTargetData.giver}</strong>, debes regalar a:</div>
-                        <div class="secret-result-name">${currentTargetData.receiver}</div>
-                    </div>
-                `;
-            } else {
-                showError('PIN incorrecto. Revisa el mensaje enviado.');
-            }
-        }
-        
-        function resetApp() {
-            window.location.href = window.location.href.split('?')[0];
-        }
-        
-        function showError(msg) {
-            const el = document.getElementById('error');
-            el.textContent = msg;
-            el.classList.add('show');
-            setTimeout(hideError, 4000);
-        }
-        
-        function hideError() {
-            document.getElementById('error').classList.remove('show');
-        }
-        
-        document.getElementById('nameInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') addParticipant(); });
-        document.getElementById('userPinInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyPin(); });
-        
-        checkUrlParams();
-    </script>
+      }
+    }
+
+    function finishSecretView() {
+      document.getElementById('reveal-card-view').classList.add('hidden');
+      document.getElementById('flip-card-inner').classList.remove('is-flipped');
+      currentSelectedUser = null;
+      renderUI();
+    }
+
+    function confirmResetAll() {
+      if (confirm('¿Deseas reiniciar el sorteo? Se eliminarán los enlaces generados.')) {
+        matches = {};
+        consulted = {};
+        saveStateToStorage();
+        renderUI();
+      }
+    }
+
+    function renderUI() {
+      const hasMatches = matches && Object.keys(matches).length > 0;
+
+      const step1Ind = document.getElementById('step-1-indicator');
+      const step2Ind = document.getElementById('step-2-indicator');
+      const step3Ind = document.getElementById('step-3-indicator');
+
+      if (!hasMatches) {
+        document.getElementById('section-step1').classList.remove('hidden');
+        document.getElementById('section-step2').classList.add('hidden');
+        document.getElementById('section-step3').classList.add('hidden');
+
+        step1Ind.className = "flex flex-col items-center p-3 rounded-2xl glass-card border-2 border-purple-500 transition-all opacity-100";
+        step2Ind.className = "flex flex-col items-center p-3 rounded-2xl glass-card opacity-40 transition-all";
+        step3Ind.className = "flex flex-col items-center p-3 rounded-2xl glass-card opacity-40 transition-all";
+
+        renderParticipantsList();
+      } else {
+        document.getElementById('section-step1').classList.add('hidden');
+        document.getElementById('section-step2').classList.add('hidden');
+        document.getElementById('section-step3').classList.remove('hidden');
+
+        step1Ind.className = "flex flex-col items-center p-3 rounded-2xl glass-card opacity-40 transition-all";
+        step2Ind.className = "flex flex-col items-center p-3 rounded-2xl glass-card opacity-40 transition-all";
+        step3Ind.className = "flex flex-col items-center p-3 rounded-2xl glass-card border-2 border-emerald-500 transition-all opacity-100";
+
+        renderDeliveryList();
+      }
+    }
+
+    function renderParticipantsList() {
+      const container = document.getElementById('participants-list-container');
+      const countBadge = document.getElementById('participant-count-badge');
+      const btnDraw = document.getElementById('btn-start-draw');
+      const btnClear = document.getElementById('btn-clear-all');
+
+      countBadge.innerText = `${participants.length} Registrado${participants.length === 1 ? '' : 's'}`;
+
+      if (participants.length === 0) {
+        container.innerHTML = `
+          <div id="empty-state" class="text-center py-8 text-slate-500 border-2 border-dashed border-slate-800 rounded-2xl">
+            <i class="fa-solid fa-user-plus text-3xl mb-2 block opacity-50"></i>
+            Aún no hay participantes en la lista.
+          </div>
+        `;
+        btnClear.classList.add('hidden');
+      } else {
+        btnClear.classList.remove('hidden');
+        container.innerHTML = participants.map((name, idx) => `
+          <div class="flex items-center justify-between bg-slate-900/60 border border-slate-800 p-3.5 rounded-2xl">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-purple-900/40 text-purple-300 flex items-center justify-center font-bold text-xs">
+                ${idx + 1}
+              </div>
+              <span class="font-semibold text-slate-200 text-sm">${escapeHtml(name)}</span>
+            </div>
+            <button onclick="removeParticipant(${idx})" class="w-8 h-8 rounded-xl hover:bg-rose-950/50 text-slate-500 hover:text-rose-400 flex items-center justify-center transition-all">
+              <i class="fa-solid fa-trash-can text-xs"></i>
+            </button>
+          </div>
+        `).join('');
+      }
+
+      if (participants.length >= 3) {
+        btnDraw.disabled = false;
+        btnDraw.className = "bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-bold py-3.5 px-8 rounded-2xl flex items-center gap-3 transition-all shadow-xl shadow-pink-600/20 active:scale-95 cursor-pointer";
+      } else {
+        btnDraw.disabled = true;
+        btnDraw.className = "bg-slate-800 text-slate-500 cursor-not-allowed font-bold py-3.5 px-8 rounded-2xl flex items-center gap-3 transition-all opacity-60";
+      }
+    }
+
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toast');
+      const icon = document.getElementById('toast-icon');
+      const message = document.getElementById('toast-message');
+
+      message.innerText = msg;
+      icon.className = type === 'warning' ? 'fa-solid fa-triangle-exclamation text-amber-400' :
+                       type === 'success' ? 'fa-solid fa-circle-check text-emerald-400' :
+                       'fa-solid fa-circle-info text-purple-400';
+
+      toast.classList.remove('translate-y-20', 'opacity-0');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/[&<>"']/g, m => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[m]));
+    }
+
+    function escapeJsString(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+    }
+  </script>
 </body>
 </html>
